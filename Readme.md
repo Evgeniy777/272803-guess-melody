@@ -1,7 +1,7 @@
 # Личный проект «Угадай мелодию» [![Build status][travis-image]][travis-url]
 
 * Студент: [Андрей Иванов](https://up.htmlacademy.ru/ecmascript/2/user/272803).
-* Наставник: `Неизвестно`.
+* Наставник: [Софья Ильинова](https://htmlacademy.ru/profile/i).
 
 ---
 
