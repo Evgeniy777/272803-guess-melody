@@ -1,8 +1,9 @@
 import getElementFromTemplate from './get-element-from-template';
 import showScreen from './show-screen';
-import firstGameScreen from './first-game-screen';
+import {initialState} from './data';
+import renderFirstGameScreen from './first-game-screen';
 
-const mainScreen = getElementFromTemplate(`
+const screenTemplate = `
   <section class="main main--welcome">
     <section class="logo" title="Угадай мелодию"><h1>Угадай мелодию</h1></section>
     <button class="main-play">Начать игру</button>
@@ -12,9 +13,17 @@ const mainScreen = getElementFromTemplate(`
       максимальное количество правильных ответов.<br>
       Удачи!
     </p>
-  </section>
-`);
+  </section>`;
 
-mainScreen.querySelector(`.main-play`).addEventListener(`click`, () => showScreen(firstGameScreen));
+const renderMainScreen = () => {
+  const mainScreen = getElementFromTemplate(screenTemplate);
+  const currentState = Object.assign({}, initialState, {
+    game: `singer`
+  });
 
-export default mainScreen;
+  mainScreen.querySelector(`.main-play`).addEventListener(`click`, () => renderFirstGameScreen(currentState));
+
+  showScreen(mainScreen);
+};
+
+export default renderMainScreen;

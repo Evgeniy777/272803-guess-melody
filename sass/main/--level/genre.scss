@@ -38,3 +38,7 @@ input[type=checkbox]:checked + .genre-answer-check {
 .genre-answer-send:hover {
   color: $color-orange;
 }
+
+.genre {
+  position: relative;
+}
