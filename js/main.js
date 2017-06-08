@@ -1,4 +1,3 @@
-import showScreen from './show-screen';
-import mainScreen from './main-screen';
+import renderMainScreen from './main-screen';
 
-showScreen(mainScreen);
+renderMainScreen();

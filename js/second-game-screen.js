@@ -1,57 +1,59 @@
 import getElementFromTemplate from './get-element-from-template';
 import showScreen from './show-screen';
-import resultsScreen from './results-screen';
-import lossScreen from './loss-screen';
+import renderFirstGameScreen from './first-game-screen';
+import checkResult from './check-result';
+import changeState from './change-state';
+import timerTemplate from './timer-template';
+import {gameData} from './data';
 
-const secondGameScreen = getElementFromTemplate(`
-  <section class="main main--level main--level-genre">
-    <h2 class="title">Выберите инди-рок треки</h2>
+const genreAnswer = (answer, index) => `
+  <div class="genre-answer">
+    <div class="player-wrapper"></div>
+    <input type="checkbox" name="answer" value="${answer.genre}" id="a-${index}">
+    <label class="genre-answer-check" for="a-${index}"></label>
+  </div>
+`;
+
+const screenTemplate = (state) => {
+  const game = gameData[state.game];
+
+  return `<section class="main main--level main--level-genre">
+    ${timerTemplate(state.leftTime)}
+    <h2 class="title">Выберите ${game.genre} треки</h2>
     <form class="genre">
-      <div class="genre-answer">
-        <div class="player-wrapper"></div>
-        <input type="checkbox" name="answer" value="answer-1" id="a-1">
-        <label class="genre-answer-check" for="a-1"></label>
-      </div>
-
-      <div class="genre-answer">
-        <div class="player-wrapper"></div>
-        <input type="checkbox" name="answer" value="answer-1" id="a-2">
-        <label class="genre-answer-check" for="a-2"></label>
-      </div>
-
-      <div class="genre-answer">
-        <div class="player-wrapper"></div>
-        <input type="checkbox" name="answer" value="answer-1" id="a-3">
-        <label class="genre-answer-check" for="a-3"></label>
-      </div>
-
-      <div class="genre-answer">
-        <div class="player-wrapper"></div>
-        <input type="checkbox" name="answer" value="answer-1" id="a-4">
-        <label class="genre-answer-check" for="a-4"></label>
-      </div>
-
+      ${game.answers.map(genreAnswer).join(``)}
       <button class="genre-answer-send" type="submit">Ответить</button>
     </form>
-  </section>
-`);
-const answerInputs = secondGameScreen.querySelectorAll(`input[name="answer"]`);
-const sendAnswer = secondGameScreen.querySelector(`.genre-answer-send`);
-const screenForm = secondGameScreen.querySelector(`.genre`);
+  </section>`;
+};
 
-let checkedAnswerInputs;
+const renderSecondGameScreen = (state) => {
+  const secondGameScreen = getElementFromTemplate(screenTemplate(state));
 
-screenForm.addEventListener(`submit`, (evt) => {
-  evt.preventDefault();
-  showScreen(Math.round(Math.random()) ? resultsScreen : lossScreen);
-});
-sendAnswer.disabled = true;
+  const answerInputs = secondGameScreen.querySelectorAll(`input[name="answer"]`);
+  const sendAnswer = secondGameScreen.querySelector(`.genre-answer-send`);
+  const screenForm = secondGameScreen.querySelector(`.genre`);
+  const isInputCheckCorrect = (input, genre) => input.checked ? input.value === genre : input.value !== genre;
 
-answerInputs.forEach((input) => {
-  input.addEventListener(`change`, (() => {
-    checkedAnswerInputs = [...answerInputs].some((checkbox) => checkbox.checked);
-    sendAnswer.disabled = !checkedAnswerInputs;
-  }));
-});
+  screenForm.addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
 
-export default secondGameScreen;
+    const isValidAnswer = [...answerInputs].every((input) => isInputCheckCorrect(input, gameData[state.game].genre));
+
+    checkResult(changeState(state, isValidAnswer), renderFirstGameScreen);
+  });
+
+  sendAnswer.disabled = true;
+
+  answerInputs.forEach((input) => {
+    input.addEventListener(`change`, () => {
+      const checkedAnswerInputs = [...answerInputs].some((checkbox) => checkbox.checked);
+
+      sendAnswer.disabled = !checkedAnswerInputs;
+    });
+  });
+
+  showScreen(secondGameScreen);
+};
+
+export default renderSecondGameScreen;

@@ -1,64 +1,52 @@
 import getElementFromTemplate from './get-element-from-template';
 import showScreen from './show-screen';
-import secondGameScreen from './second-game-screen';
+import renderSecondGameScreen from './second-game-screen';
+import checkResult from './check-result';
+import changeState from './change-state';
+import timerTemplate from './timer-template';
 import {ENTER_KEY_CODE} from './constants';
+import {gameData} from './data';
 
-const firstGameScreen = getElementFromTemplate(`
+const mainAnswer = (answer, index) => `
+  <div class="main-answer-wrapper">
+    <input class="main-answer-r" type="radio" id="answer-${index}" name="answer" value="${answer.name}" tabindex="-1" />
+    <label class="main-answer" for="answer-${index}" tabindex="0">
+      <img class="main-answer-preview" src="${answer.src}">
+      ${answer.name}
+    </label>
+  </div>
+`;
+
+export const screenTemplate = (state) => `
   <section class="main main--level main--level-artist">
-    <svg xmlns="http://www.w3.org/2000/svg" class="timer" viewBox="0 0 780 780">
-      <circle
-        cx="390" cy="390" r="370"
-        class="timer-line"
-        style="filter: url(.#blur); transform: rotate(-90deg) scaleY(-1); transform-origin: center"></circle>
-
-      <div class="timer-value" xmlns="http://www.w3.org/1999/xhtml">
-        <span class="timer-value-mins">02</span><!--
-        --><span class="timer-value-dots">:</span><!--
-        --><span class="timer-value-secs">00</span>
-      </div>
-    </svg>
-
+    ${timerTemplate(state.leftTime)}
     <div class="main-wrap">
-      <div class="main-timer"></div>
-
       <h2 class="title main-title">Кто исполняет эту песню?</h2>
       <div class="player-wrapper"></div>
-      <form class="main-list">
-        <div class="main-answer-wrapper">
-          <input class="main-answer-r" type="radio" id="answer-1" name="answer" value="val-1" tabindex="-1" />
-          <label class="main-answer" for="answer-1" tabindex="0">
-            <img class="main-answer-preview" src="">
-            Пелагея
-          </label>
-        </div>
-
-        <div class="main-answer-wrapper">
-          <input class="main-answer-r" type="radio" id="answer-2" name="answer" value="val-1" tabindex="-1" />
-          <label class="main-answer" for="answer-2" tabindex="0">
-            <img class="main-answer-preview" src="">
-            Краснознаменная дивизия имени моей бабушки
-          </label>
-        </div>
-
-        <div class="main-answer-wrapper">
-          <input class="main-answer-r" type="radio" id="answer-2" name="answer" value="val-1" tabindex="-1" />
-          <label class="main-answer" for="answer-2" tabindex="0">
-            <img class="main-answer-preview" src="">
-            Lorde
-          </label>
-        </div>
-      </form>
+      <form class="main-list">${gameData[state.game].answers.map(mainAnswer).join(``)}</form>
     </div>
   </section>
-`);
+`;
 
-firstGameScreen.querySelectorAll(`.main-answer`).forEach((answer) => {
-  answer.addEventListener(`click`, () => showScreen(secondGameScreen));
-  answer.addEventListener(`keydown`, (evt) => {
+const renderFirstGameScreen = (state) => {
+  const firstGameScreen = getElementFromTemplate(screenTemplate(state));
+  const author = gameData[state.game].author;
+
+  const answerClickHandler = (isValidAnswer) => checkResult(changeState(state, isValidAnswer), renderSecondGameScreen);
+  const answerKeyDownHandler = (evt, isValidAnswer) => {
     if (evt.keyCode === ENTER_KEY_CODE) {
-      showScreen(secondGameScreen);
+      checkResult(changeState(state, isValidAnswer), renderSecondGameScreen);
     }
-  });
-});
+  };
 
-export default firstGameScreen;
+  firstGameScreen.querySelectorAll(`.main-answer`).forEach((answer) => {
+    const isValidAnswer = author === (answer.textContent).trim();
+
+    answer.addEventListener(`click`, () => answerClickHandler(isValidAnswer));
+    answer.addEventListener(`keydown`, (evt) => answerKeyDownHandler(evt, isValidAnswer));
+  });
+
+  showScreen(firstGameScreen);
+};
+
+export default renderFirstGameScreen;
