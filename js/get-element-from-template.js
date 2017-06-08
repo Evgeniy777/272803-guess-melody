@@ -1,9 +1,9 @@
 const getElementFromTemplate = (html) => {
-  const helpElement = document.createElement(`div`);
+  const template = document.createElement(`template`);
 
-  helpElement.innerHTML = html;
+  template.innerHTML = html;
 
-  return helpElement.firstElementChild;
+  return template.content;
 };
 
 export default getElementFromTemplate;
