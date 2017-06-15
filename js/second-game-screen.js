@@ -1,9 +1,8 @@
 import getElementFromTemplate from './get-element-from-template';
-import showScreen from './show-screen';
-import renderFirstGameScreen from './first-game-screen';
 import checkResult from './check-result';
 import changeState from './change-state';
-import timerTemplate from './timer-template';
+import initializePlayer from './player';
+import getTimeFromTemplate from './get-time-from-template';
 import {gameData} from './data';
 
 const genreAnswer = (answer, index) => `
@@ -15,20 +14,26 @@ const genreAnswer = (answer, index) => `
 `;
 
 const screenTemplate = (state) => {
-  const game = gameData[state.game];
+  const game = gameData[state.questionType];
 
-  return `<section class="main main--level main--level-genre">
-    ${timerTemplate(state.leftTime)}
+  return `
+  <div class="main-wrap">
     <h2 class="title">Выберите ${game.genre} треки</h2>
     <form class="genre">
       ${game.answers.map(genreAnswer).join(``)}
       <button class="genre-answer-send" type="submit">Ответить</button>
     </form>
-  </section>`;
+  </div>
+  `;
 };
 
 const renderSecondGameScreen = (state) => {
+  const gameScreen = document.querySelector(`.main--level`);
   const secondGameScreen = getElementFromTemplate(screenTemplate(state));
+  const players = secondGameScreen.querySelectorAll(`.player-wrapper`);
+  const game = gameData[state.questionType];
+
+  [...players].forEach((player, index) => initializePlayer(player, game.answers[index].url));
 
   const answerInputs = secondGameScreen.querySelectorAll(`input[name="answer"]`);
   const sendAnswer = secondGameScreen.querySelector(`.genre-answer-send`);
@@ -38,9 +43,9 @@ const renderSecondGameScreen = (state) => {
   screenForm.addEventListener(`submit`, (evt) => {
     evt.preventDefault();
 
-    const isValidAnswer = [...answerInputs].every((input) => isInputCheckCorrect(input, gameData[state.game].genre));
+    const isValidAnswer = [...answerInputs].every((input) => isInputCheckCorrect(input, game.genre));
 
-    checkResult(changeState(state, isValidAnswer), renderFirstGameScreen);
+    checkResult(changeState(state, getTimeFromTemplate(gameScreen), isValidAnswer));
   });
 
   sendAnswer.disabled = true;
@@ -53,7 +58,7 @@ const renderSecondGameScreen = (state) => {
     });
   });
 
-  showScreen(secondGameScreen);
+  gameScreen.replaceChild(secondGameScreen, document.querySelector(`.main-wrap`));
 };
 
 export default renderSecondGameScreen;

@@ -2,6 +2,8 @@ import getElementFromTemplate from './get-element-from-template';
 import showScreen from './show-screen';
 import {initialState} from './data';
 import renderFirstGameScreen from './first-game-screen';
+import getGameScreen from './game-screen';
+import initializeCountdown from './timer';
 
 const screenTemplate = `
   <section class="main main--welcome">
@@ -15,13 +17,16 @@ const screenTemplate = `
     </p>
   </section>`;
 
+const startGame = (state) => {
+  showScreen(getGameScreen(state));
+  renderFirstGameScreen(state);
+  initializeCountdown(state);
+};
+
 const renderMainScreen = () => {
   const mainScreen = getElementFromTemplate(screenTemplate);
-  const currentState = Object.assign({}, initialState, {
-    game: `singer`
-  });
 
-  mainScreen.querySelector(`.main-play`).addEventListener(`click`, () => renderFirstGameScreen(currentState));
+  mainScreen.querySelector(`.main-play`).addEventListener(`click`, () => startGame(initialState));
 
   showScreen(mainScreen);
 };

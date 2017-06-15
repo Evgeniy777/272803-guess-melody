@@ -1,14 +1,13 @@
 import getElementFromTemplate from './get-element-from-template';
 import showScreen from './show-screen';
 import renderMainScreen from './main-screen';
-import getTime from './get-time';
 import {ENTER_KEY_CODE} from './constants';
 
 const resultContent = {
   win: {
     title: `Вы настоящий меломан!`,
-    stat: (state) => `За&nbsp;${getTime(120000 - [state.leftTime]).minutes}&nbsp;минуты<br>вы&nbsp;отгадали ${state.statistics.rightAnswers}&nbsp;мелодии`,
-    comparison: (state) => `<span class="main-comparison">Это&nbsp;лучше чем у&nbsp;${state.statistics.comparison}%&nbsp;игроков</span>`
+    stat: (statistics) => `За&nbsp;${statistics.time}&nbsp;секунд<br>вы&nbsp;отгадали ${statistics.rightAnswers}&nbsp;мелодии`,
+    comparison: (statistics) => `<span class="main-comparison">Это&nbsp;лучше чем у&nbsp;${statistics.comparison}%&nbsp;игроков</span>`
   },
   loss: {
     title: `Вы проиграли`,
@@ -23,8 +22,8 @@ const screenTemplate = (state) => {
   return `<section class="main main--result">
     <section class="logo" title="Угадай мелодию"><h1>Угадай мелодию</h1></section>
     <h2 class="title">${result.title}</h2>
-    <div class="main-stat">${result.stat(state)}</div>
-    ${result.comparison(state)}
+    <div class="main-stat">${result.stat(state.statistics)}</div>
+    ${result.comparison(state.statistics)}
     <span role="button" tabindex="0" class="main-replay">Сыграть ещё раз</span>
   </section>`;
 };

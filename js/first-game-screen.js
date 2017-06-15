@@ -1,9 +1,8 @@
 import getElementFromTemplate from './get-element-from-template';
-import showScreen from './show-screen';
-import renderSecondGameScreen from './second-game-screen';
 import checkResult from './check-result';
 import changeState from './change-state';
-import timerTemplate from './timer-template';
+import initializePlayer from './player';
+import getTimeFromTemplate from './get-time-from-template';
 import {ENTER_KEY_CODE} from './constants';
 import {gameData} from './data';
 
@@ -18,35 +17,36 @@ const mainAnswer = (answer, index) => `
 `;
 
 export const screenTemplate = (state) => `
-  <section class="main main--level main--level-artist">
-    ${timerTemplate(state.leftTime)}
-    <div class="main-wrap">
-      <h2 class="title main-title">Кто исполняет эту песню?</h2>
-      <div class="player-wrapper"></div>
-      <form class="main-list">${gameData[state.game].answers.map(mainAnswer).join(``)}</form>
-    </div>
-  </section>
+  <div class="main-wrap">
+    <h2 class="title main-title">Кто исполняет эту песню?</h2>
+    <div class="player-wrapper"></div>
+    <form class="main-list">${gameData[state.questionType].answers.map(mainAnswer).join(``)}</form>
+  </div>
 `;
 
 const renderFirstGameScreen = (state) => {
+  const gameScreen = document.querySelector(`.main--level`);
   const firstGameScreen = getElementFromTemplate(screenTemplate(state));
-  const author = gameData[state.game].author;
+  const author = gameData[state.questionType].author;
+  const player = firstGameScreen.querySelector(`.player-wrapper`);
+  initializePlayer(player, gameData[state.questionType].url, true);
 
-  const answerClickHandler = (isValidAnswer) => checkResult(changeState(state, isValidAnswer), renderSecondGameScreen);
+  const checkArtist = (isValidAnswer) => checkResult(changeState(state, getTimeFromTemplate(gameScreen), isValidAnswer));
+
   const answerKeyDownHandler = (evt, isValidAnswer) => {
     if (evt.keyCode === ENTER_KEY_CODE) {
-      checkResult(changeState(state, isValidAnswer), renderSecondGameScreen);
+      checkArtist(isValidAnswer);
     }
   };
 
   firstGameScreen.querySelectorAll(`.main-answer`).forEach((answer) => {
     const isValidAnswer = author === (answer.textContent).trim();
 
-    answer.addEventListener(`click`, () => answerClickHandler(isValidAnswer));
+    answer.addEventListener(`click`, () => checkArtist(isValidAnswer));
     answer.addEventListener(`keydown`, (evt) => answerKeyDownHandler(evt, isValidAnswer));
   });
 
-  showScreen(firstGameScreen);
+  gameScreen.replaceChild(firstGameScreen, document.querySelector(`.main-wrap`));
 };
 
 export default renderFirstGameScreen;
