@@ -135,17 +135,6 @@ describe(`changeState`, () => {
       const nextState = changeState(state, {minutes: 1, seconds: 0}, false);
       assert.equal(nextState.result, `loss`);
     });
-    it(`should always be 'loss', if there is no time left`, () => {
-      const state = {
-        questionType: `singer`,
-        leftMistakes: 1,
-        leftScreens: 1,
-        statistics: {time: 0, rightAnswers: 0},
-        result: null
-      };
-      const nextState = changeState(state, {minutes: 0, seconds: 0}, true);
-      assert.equal(nextState.result, `loss`);
-    });
   });
   describe(`time`, () => {
     it(`should always increase, while the left time is going down`, () => {

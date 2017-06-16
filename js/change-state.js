@@ -18,7 +18,7 @@ const changeState = (state, time, isValidAnswer) => {
     })
   });
 
-  if (currentState.statistics.time === initialState.duration || !currentState.leftMistakes) {
+  if (!currentState.leftMistakes) {
     currentState.result = `loss`;
   } else if (!currentState.leftScreens) {
     currentState.result = `win`;
