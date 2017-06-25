@@ -33,13 +33,17 @@ export default class Timer extends AbstractView {
     const radius = parseInt(element.getAttributeNS(null, `r`), 10);
     const timer = this.element.querySelector(`.timer-value`);
 
-    return animationObj.animate(animationObj.getAnimation(0, 1000, this.state.duration), (animation) => {
+    const countDown = animationObj.animate(animationObj.getAnimation(0, 1000, this.state.duration), (animation) => {
       this.redrawCircle(element, radius, animation);
       this.redrawTimer(timer, animation);
+      this.changeState(this.getTime());
     }, () => {
       timer.classList.add(`timer-value--finished`);
       this.finishGame();
     });
+    this.clearTiming = countDown;
+
+    return countDown;
   }
 
   redrawCircle(circle, radius, animation) {
@@ -75,6 +79,13 @@ export default class Timer extends AbstractView {
     };
   }
 
+  getTime() {
+    const minutes = parseInt(this.element.querySelector(`.timer-value-mins`).textContent, 10);
+    const seconds = parseInt(this.element.querySelector(`.timer-value-secs`).textContent, 10);
+
+    return {minutes, seconds};
+  }
+
   addLeadingZero(val) {
     return val < 10 ? `0${val}` : val;
   }
@@ -88,6 +99,14 @@ export default class Timer extends AbstractView {
   }
 
   finishGame() {
+
+  }
+
+  changeState() {
+
+  }
+
+  stopTimer() {
 
   }
 }

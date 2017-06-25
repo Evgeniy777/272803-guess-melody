@@ -20,7 +20,7 @@ export const gameData = Object.freeze({
 });
 
 export const initialState = Object.freeze({
-  questionType: `singer`,
+  questionType: null,
   duration: 120,
   leftMistakes: 3,
   leftScreens: 10,
