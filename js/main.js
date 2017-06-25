@@ -1,3 +1,3 @@
-import renderMainScreen from './welcome-screen/welcome-screen';
+import Application from './application';
 
-renderMainScreen();
+Application.showWelcome();
