@@ -1,7 +1,7 @@
 import AbstractView from '../abstract-view';
 import initializePlayer from '../player';
 
-export default class GenreQuestionScreen extends AbstractView {
+export default class GenreQuestionView extends AbstractView {
   constructor(state, gameData) {
     super();
     this.game = gameData[state.questionType];

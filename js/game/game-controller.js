@@ -1,22 +1,20 @@
-import {initialState} from '../data';
-import Timer from './timer-view';
-import Application from '../application';
-import SingerQuestionScreen from './singer-question-view';
-import GenreQuestionScreen from './genre-question-view';
-import {gameData} from '../data';
+import {initialState, gameData} from '../data';
+import TimerView from './timer-view';
+import SingerQuestionView from './singer-question-view';
+import GenreQuestionView from './genre-question-view';
 
-export class GameController {
-  constructor(state) {
+export default class GameController {
+  constructor(state, application) {
     this.initialState = state;
     this.state = state;
-    this.timer = new Timer(this.initialState);
-    this.question = this.newQuestion;
+    this.application = application;
+    this.timer = new TimerView(this.initialState);
+    this.getNextQuestion();
   }
 
   init() {
-    this.reset();
     this.showTimer();
-    this.timer.finishGame = () => Application.showResultsScreen(this.changeState());
+    this.timer.finishGame = () => this.application.showResultsScreen(this.changeState());
     this.timer.changeState = (time) => this.changeTime(time);
     this.initQuestion();
   }
@@ -42,7 +40,8 @@ export class GameController {
 
   checkResult() {
     if (this.state.result) {
-      Application.showResultsScreen(this.state);
+      this.application.showResultsScreen(this.state);
+      this.resetTimer();
     } else {
       this.getNextQuestion();
       this.initQuestion();
@@ -87,17 +86,14 @@ export class GameController {
     return this.state;
   }
 
-  reset() {
-    this.state = this.initialState;
+  resetTimer() {
     this.timer.stopTimer();
-    this.timer = new Timer(this.initialState);
-    this.getNextQuestion();
   }
 
   getNextQuestion() {
     const map = {
-      singer: SingerQuestionScreen,
-      genre: GenreQuestionScreen
+      singer: SingerQuestionView,
+      genre: GenreQuestionView
     };
 
     this.question = new map[this.state.questionType](this.state, gameData);
@@ -105,7 +101,3 @@ export class GameController {
     return this.question;
   }
 }
-
-const gameController = new GameController(Object.assign({}, initialState, {questionType: `singer`}));
-
-export default gameController;

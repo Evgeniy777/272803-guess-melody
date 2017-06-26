@@ -1,7 +1,7 @@
 import AbstractView from '../abstract-view';
 import animationObj from '../animate';
 
-export default class Timer extends AbstractView {
+export default class TimerView extends AbstractView {
   constructor(state) {
     super();
     this.state = state;
@@ -41,7 +41,7 @@ export default class Timer extends AbstractView {
       timer.classList.add(`timer-value--finished`);
       this.finishGame();
     });
-    this.clearTiming = countDown;
+    this.stopTimer = countDown;
 
     return countDown;
   }

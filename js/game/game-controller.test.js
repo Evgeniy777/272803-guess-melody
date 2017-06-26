@@ -1,7 +1,7 @@
-import {GameController} from './game-screen-controller';
+import GameController from './game-controller';
 import assert from 'assert';
 
-describe(`changeState`, () => {
+describe(`GameController#changeState()`, () => {
   it(`next state object is not equal to the initial state object`, () => {
     const state = {
       questionType: `singer`,
@@ -9,11 +9,11 @@ describe(`changeState`, () => {
       leftScreens: 10,
       statistics: {rightAnswers: 0}
     };
-    const gameController = new GameController(state);
+    const gameController = new GameController(state, null);
     gameController.changeState(true);
     assert.notEqual(gameController.state, gameController.initialState);
   });
-  describe(`questionType`, () => {
+  describe(`#questionType`, () => {
     it(`should always change the game screen, while the game goes on`, () => {
       const state = {
         questionType: `singer`,
@@ -21,7 +21,7 @@ describe(`changeState`, () => {
         leftScreens: 10,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(true);
       assert.equal(gameController.state.questionType, `genre`);
 
@@ -31,12 +31,12 @@ describe(`changeState`, () => {
         leftScreens: 10,
         statistics: {rightAnswers: 0}
       };
-      const gameController1 = new GameController(state1);
+      const gameController1 = new GameController(state1, null);
       gameController1.changeState(false);
       assert.equal(gameController1.state.questionType, `singer`);
     });
   });
-  describe(`leftMistakes`, () => {
+  describe(`#leftMistakes`, () => {
     it(`should always be decremented, if the answer is wrong`, () => {
       const state = {
         questionType: `singer`,
@@ -44,7 +44,7 @@ describe(`changeState`, () => {
         leftScreens: 10,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(false);
       assert.equal(gameController.state.leftMistakes, 2);
     });
@@ -55,7 +55,7 @@ describe(`changeState`, () => {
         leftScreens: 10,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(true);
       assert.equal(gameController.state.leftMistakes, 3);
     });
@@ -66,12 +66,12 @@ describe(`changeState`, () => {
         leftScreens: 8,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(false);
       assert.equal(gameController.state.result, `loss` || `win`);
     });
   });
-  describe(`leftScreens`, () => {
+  describe(`#leftScreens`, () => {
     it(`should always be decremented, whether the answer is wrong or correct`, () => {
       const state = {
         questionType: `singer`,
@@ -79,7 +79,7 @@ describe(`changeState`, () => {
         leftScreens: 10,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(true);
       assert.equal(gameController.state.leftScreens, 9);
 
@@ -94,12 +94,12 @@ describe(`changeState`, () => {
         statistics: {rightAnswers: 0},
         result: null
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(false);
       assert.equal(gameController.state.result, `loss` || `win`);
     });
   });
-  describe(`rightAnswers`, () => {
+  describe(`#rightAnswers`, () => {
     it(`should always be incremented, if the answer is correct`, () => {
       const state = {
         questionType: `singer`,
@@ -107,7 +107,7 @@ describe(`changeState`, () => {
         leftScreens: 1,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(true);
       assert.equal(gameController.state.statistics.rightAnswers, 1);
     });
@@ -118,12 +118,12 @@ describe(`changeState`, () => {
         leftScreens: 1,
         statistics: {rightAnswers: 0}
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(false);
       assert.equal(gameController.state.statistics.rightAnswers, 0);
     });
   });
-  describe(`result`, () => {
+  describe(`#result`, () => {
     it(`should always be 'win', if there are no screens left and more then 0 mistakes left`, () => {
       const state = {
         questionType: `singer`,
@@ -133,7 +133,7 @@ describe(`changeState`, () => {
         statistics: {rightAnswers: 0},
         result: null
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(true);
       assert.equal(gameController.state.result, `win`);
     });
@@ -145,7 +145,7 @@ describe(`changeState`, () => {
         statistics: {rightAnswers: 0},
         result: null
       };
-      const gameController = new GameController(state);
+      const gameController = new GameController(state, null);
       gameController.changeState(false);
       assert.equal(gameController.state.result, `loss`);
     });
