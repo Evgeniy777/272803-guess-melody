@@ -2,7 +2,7 @@ import AbstractView from '../abstract-view';
 import {ENTER_KEY_CODE} from '../constants';
 import initializePlayer from '../player';
 
-export default class SingerQuestionScreen extends AbstractView {
+export default class SingerQuestionView extends AbstractView {
   constructor(state, gameData) {
     super();
     this.game = gameData[state.questionType];
