@@ -2,7 +2,7 @@ import ResultsView from './results-view';
 import {history} from '../data';
 
 export default class ResultsController {
-  constructor(state, application) {
+  constructor(application, state) {
     this.state = state;
     this.application = application;
     this.screen = new ResultsView(this.state);
@@ -11,6 +11,7 @@ export default class ResultsController {
   init() {
     this.findComparison();
     this.showScreen();
+    this.application.model.resetState();
     this.screen.replayHandler = () => this.application.showWelcome();
   }
 

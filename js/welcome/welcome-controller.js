@@ -1,7 +1,7 @@
 import WelcomeView from './welcome-view';
 
-export default class WelcomeScreenController {
-  constructor(_, application) {
+export default class WelcomeController {
+  constructor(application) {
     this.screen = new WelcomeView();
     this.application = application;
   }

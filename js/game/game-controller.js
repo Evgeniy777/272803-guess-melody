@@ -1,28 +1,26 @@
-import {initialState, gameData} from '../data';
 import TimerView from './timer-view';
 import SingerQuestionView from './singer-question-view';
 import GenreQuestionView from './genre-question-view';
 
 export default class GameController {
-  constructor(state, application) {
-    this.initialState = state;
-    this.state = state;
+  constructor(application) {
     this.application = application;
-    this.timer = new TimerView(this.initialState);
-    this.getNextQuestion();
+    this.model = this.application.model;
+    this.timer = new TimerView(this.application.model.state);
   }
 
   init() {
     this.showTimer();
-    this.timer.finishGame = () => this.application.showResultsScreen(this.changeState());
-    this.timer.changeState = (time) => this.changeTime(time);
+    this.timer.finishGame = () => this.application.showResultsScreen(this.model.changeState());
+    this.timer.changeState = (time) => this.model.changeTime(time);
+    this.getNextQuestion();
     this.initQuestion();
   }
 
   initQuestion() {
     this.showQuestion();
     this.question.checkAnswer = (isValidAnswer) => {
-      this.changeState(isValidAnswer);
+      this.model.changeState(isValidAnswer);
       this.checkResult();
     };
   }
@@ -39,8 +37,8 @@ export default class GameController {
   }
 
   checkResult() {
-    if (this.state.result) {
-      this.application.showResultsScreen(this.state);
+    if (this.model.state.result) {
+      this.application.showResultsScreen(this.model.state);
       this.resetTimer();
     } else {
       this.getNextQuestion();
@@ -48,55 +46,18 @@ export default class GameController {
     }
   }
 
-  changeState(isValidAnswer) {
-    const transitions = {
-      genre: `singer`,
-      singer: `genre`
-    };
-
-    const currentState = Object.assign({}, this.state, {
-      questionType: transitions[this.state.questionType],
-      leftMistakes: this.state.leftMistakes - (isValidAnswer ? 0 : 1),
-      leftScreens: this.state.leftScreens - 1,
-      statistics: Object.assign({}, this.state.statistics, {
-        rightAnswers: this.state.statistics.rightAnswers + (isValidAnswer ? 1 : 0)
-      })
-    });
-
-    if (currentState.statistics.time === currentState.duration || !currentState.leftMistakes) {
-      currentState.result = `loss`;
-    } else if (!currentState.leftScreens) {
-      currentState.result = `win`;
-    }
-
-    this.state = currentState;
-
-    return this.state;
-  }
-
-  changeTime(time) {
-    const gameTime = initialState.duration - time.minutes * 60 - time.seconds;
-
-    this.state = Object.assign({}, this.state, {
-      statistics: Object.assign({}, this.state.statistics, {
-        time: gameTime
-      })
-    });
-
-    return this.state;
-  }
-
   resetTimer() {
     this.timer.stopTimer();
   }
 
   getNextQuestion() {
+    const question = this.model.state.questions[this.model.state.questionNumber];
     const map = {
-      singer: SingerQuestionView,
+      artist: SingerQuestionView,
       genre: GenreQuestionView
     };
 
-    this.question = new map[this.state.questionType](this.state, gameData);
+    this.question = new map[question.type](question);
 
     return this.question;
   }

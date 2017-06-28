@@ -1,5 +1,3 @@
 import Application from './application';
 
-const application = new Application();
-application.init();
-application.showWelcome();
+export const application = new Application();
