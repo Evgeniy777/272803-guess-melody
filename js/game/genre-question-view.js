@@ -2,9 +2,9 @@ import AbstractView from '../abstract-view';
 import initializePlayer from '../player';
 
 export default class GenreQuestionView extends AbstractView {
-  constructor(state, gameData) {
+  constructor(gameData) {
     super();
-    this.game = gameData[state.questionType];
+    this.game = gameData;
   }
 
   get template() {
@@ -18,7 +18,7 @@ export default class GenreQuestionView extends AbstractView {
 
     return `
     <div class="main-wrap">
-      <h2 class="title">Выберите ${this.game.genre} треки</h2>
+      <h2 class="title">${this.game.question}</h2>
       <form class="genre">
         ${this.game.answers.map(genreAnswer).join(``)}
         <button class="genre-answer-send" type="submit" disabled>Ответить</button>
@@ -32,7 +32,7 @@ export default class GenreQuestionView extends AbstractView {
     const answerInputs = this.element.querySelectorAll(`input[name="answer"]`);
     const players = this.element.querySelectorAll(`.player-wrapper`);
 
-    [...players].forEach((player, index) => initializePlayer(player, this.game.answers[index].url));
+    [...players].forEach((player, index) => initializePlayer(player, this.game.answers[index].src));
 
     screenForm.addEventListener(`submit`, (evt) => {
       evt.preventDefault();

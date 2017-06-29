@@ -1,7 +1,8 @@
 import WelcomeController from './welcome/welcome-controller';
 import GameController from './game/game-controller';
 import ResultsController from './results/results-contoller';
-import {initialState} from './data';
+import Model from './model/model';
+import PreloadView from './preload/preload-view';
 
 const ControllerID = {
   WELCOME: ``,
@@ -11,6 +12,17 @@ const ControllerID = {
 
 export default class Application {
   constructor() {
+    const preloadRemove = this.showPreloader();
+    this.model = new Model();
+
+    this.model.load()
+      .then(() => this.setup())
+      .then(preloadRemove)
+      .then(() => this.changeController())
+      .catch(window.console.error);
+  }
+
+  setup() {
     this.router = {
       [ControllerID.WELCOME]: WelcomeController,
       [ControllerID.GAME]: GameController,
@@ -22,8 +34,11 @@ export default class Application {
     });
   }
 
-  init() {
-    this.changeController();
+  showPreloader() {
+    const preloadView = new PreloadView();
+    preloadView.start();
+
+    return () => preloadView.hide();
   }
 
   showWelcome() {
@@ -58,28 +73,13 @@ export default class Application {
 
   changeController() {
     const {controller, params} = Application.deserialize(location.hash);
-    let state;
-
-    switch (controller) {
-      case `result`:
-        state = params;
-        break;
-      case `game`:
-        state = Object.assign({}, initialState, {questionType: `singer`});
-        break;
-      case ``:
-        state = null;
-        break;
-      default:
-        this.showWelcome();
-        return null;
-    }
-
     const Controller = this.router[controller];
-    const control = new Controller(state, this);
-    control.init();
 
-    return control;
+    if (Controller) {
+      new Controller(this, params).init();
+    } else {
+      this.showWelcome();
+    }
   }
 
   static serialize(state) {

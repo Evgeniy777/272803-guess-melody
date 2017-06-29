@@ -9,9 +9,9 @@ describe(`ResultsScreenController`, () => {
         time: 120,
         result: `win`
       };
-      const resultsScreen = new ResultsController(state);
-      resultsScreen.findComparison();
-      assert(resultsScreen.state.comparison);
+      const resultsController = new ResultsController(null, state);
+      resultsController.findComparison();
+      assert(resultsController.state.comparison);
     });
     it(`should not add comparison if player loses'`, () => {
       const state = {
@@ -19,9 +19,9 @@ describe(`ResultsScreenController`, () => {
         time: 120,
         result: `loss`
       };
-      const resultsScreen = new ResultsController(state);
-      resultsScreen.findComparison(state);
-      assert(!resultsScreen.state.comparison);
+      const resultsController = new ResultsController(null, state);
+      resultsController.findComparison(state);
+      assert(!resultsController.state.comparison);
     });
   });
 });
