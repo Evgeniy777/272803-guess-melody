@@ -3,6 +3,7 @@ import GameController from './game/game-controller';
 import ResultsController from './results/results-contoller';
 import Model from './model/model';
 import PreloadView from './preload/preload-view';
+import loadAudio from './load-audio';
 
 const ControllerID = {
   WELCOME: ``,
@@ -35,24 +36,14 @@ export default class Application {
     });
   }
 
-  loadAudio(url) {
-    const getAudio = () => new Promise((resolve, reject) => {
-      const audio = document.createElement(`audio`);
-      audio.src = url;
-
-      audio.onloadeddata = (evt) => resolve(evt.target.response);
-      audio.onerror = () => reject(`Error`);
-    });
-    return getAudio()
-      .catch((error) => window.console.warn(error));
-  }
-
   loadGameAudios() {
     const urls = [];
-    this.model.state.questions.forEach((question) => question.src ? urls.push(question.src) : question.answers.forEach((answer) => urls.push(answer.src)));
+    this.model.state.questions
+      .forEach((question) => question.src ?
+      urls.push(question.src) :
+      question.answers.forEach((answer) => urls.push(answer.src)));
 
-    return Promise.all(urls.map((url) => this.loadAudio(url)))
-      .catch((error) => window.console.warn(error));
+    return Promise.all(urls.filter((url) => !!url).map((url) => loadAudio(url)));
   }
 
   showPreloader() {

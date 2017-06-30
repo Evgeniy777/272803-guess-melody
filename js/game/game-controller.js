@@ -66,7 +66,7 @@ export default class GameController {
 
   getNextQuestion() {
     const question = this.model.state.questions[this.model.state.questionNumber];
-    
+
     const map = {
       artist: SingerQuestionView,
       genre: GenreQuestionView
