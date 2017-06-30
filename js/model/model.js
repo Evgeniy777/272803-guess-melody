@@ -1,3 +1,15 @@
+class DefaultAdapter {
+  toServer() {
+    throw Error(`Abstract method. Define toServer method`);
+  }
+}
+
+const defaultAdapter = new class extends DefaultAdapter {
+  toServer(data) {
+    return JSON.stringify(data);
+  }
+}();
+
 class AbstractModel {
   get urlRead() {
     throw Error(`Abstract method. Define URL for model`);
@@ -15,6 +27,17 @@ class AbstractModel {
     return fetch(this.urlRead)
       .then((resp) => resp.json());
   }
+
+  save(params, adapter = defaultAdapter) {
+    const settings = {
+      body: adapter.toServer(params),
+      headers: {
+        'Content-type': `application/json`
+      },
+      method: `POST`
+    };
+    return fetch(this.urlWrite, settings);
+  }
 }
 
 export default class Model extends AbstractModel {
@@ -22,7 +45,7 @@ export default class Model extends AbstractModel {
     return `https://intensive-ecmascript-server-btfgudlkpi.now.sh/guess-melody/questions`;
   }
   get urlWrite() {
-    return `https://intensive-ecmascript-server-btfgudlkpi.now.sh/guess-melody/stats/:Andron`;
+    return `https://intensive-ecmascript-server-btfgudlkpi.now.sh/guess-melody/stats/Andrey272803`;
   }
 
   get initialState() {
@@ -31,13 +54,15 @@ export default class Model extends AbstractModel {
       leftMistakes: 3,
       questionNumber: 0,
       questions: null,
-      statistics: {
-        time: 0,
-        points: 0,
+      game: {
         rightAnswers: 0,
-        comparison: null
+        result: null,
+        statistics: {
+          time: 0,
+          answers: 0
+        }
       },
-      result: null
+      history: null
     };
   }
 
@@ -59,25 +84,57 @@ export default class Model extends AbstractModel {
       });
   }
 
+  loadStatistics() {
+    return fetch(this.urlWrite)
+      .then((data) => data.json())
+      .then((data) => {
+        this.state.history = data;
+      });
+  }
+
+  loadAudio(url) {
+    const getAudio = () => new Promise((resolve, reject) => {
+      const audio = document.createElement(`audio`);
+      audio.src = url;
+
+      audio.onloadeddata = (evt) => resolve(evt.target.response);
+      audio.onerror = () => reject(`Error`);
+    });
+    return getAudio();
+  }
+
+  loadGameAudios() {
+    const urls = [];
+    this.state.questions.forEach((question) => question.src ? urls.push(question.src) : question.answers.forEach((answer) => urls.push(answer.src)));
+
+    return this.loadAudio(urls[0])
+      .then(() => urls.slice(1).forEach((url) => this.loadAudio(url)))
+      .catch(window.console.error);
+  }
+
   resetState() {
     this.state = this.initialState;
     this.load();
   }
 
   changeState(isValidAnswer) {
-    const statistics = this.state.statistics;
+    const game = this.state.game;
+    const statistics = game.statistics;
     const currentState = Object.assign({}, this.state, {
       leftMistakes: this.state.leftMistakes - (isValidAnswer ? 0 : 1),
       questionNumber: this.state.questionNumber + 1,
-      statistics: Object.assign({}, statistics, {
-        rightAnswers: statistics.rightAnswers + (isValidAnswer ? 1 : 0)
+      game: Object.assign({}, game, {
+        rightAnswers: game.rightAnswers + (isValidAnswer ? 1 : 0),
+        statistics: Object.assign({}, statistics, {
+          answers: statistics.answers + (isValidAnswer ? 1 : 0)
+        })
       })
     });
 
-    if (currentState.statistics.time === currentState.duration || !currentState.leftMistakes) {
-      currentState.result = `loss`;
-    } else if (currentState.questionNumber === this.state.questions.length) {
-      currentState.result = `win`;
+    if (currentState.game.statistics.time === currentState.duration || !currentState.leftMistakes) {
+      currentState.game.result = `loss`;
+    } else if (currentState.questionNumber === currentState.questions.length) {
+      currentState.game.result = `win`;
     }
 
     this.state = currentState;
@@ -88,12 +145,29 @@ export default class Model extends AbstractModel {
   changeTime(time) {
     const gameTime = this.state.duration - time;
 
-    this.state = Object.assign({}, this.state, {
-      statistics: Object.assign({}, this.state.statistics, {
+    this.state.game = Object.assign({}, this.state.game, {
+      statistics: Object.assign({}, this.state.game.statistics, {
         time: gameTime
       })
     });
 
     return this.state;
+  }
+
+  findComparison() {
+    const statistics = this.state.history.slice();
+    const myStatistics = this.state.game.statistics;
+    const myTime = parseInt(myStatistics.time, 10);
+    const myRightAnswers = parseInt(myStatistics.answers, 10);
+
+    const worseResults = statistics.filter((result) => {
+      const rightAnswers = parseInt(result.answers, 10);
+
+      return rightAnswers === myRightAnswers ? parseInt(result.time, 10) > myTime : rightAnswers < myRightAnswers;
+    });
+
+    this.state.game.comparison = Math.floor(worseResults.length * 100 / statistics.length);
+
+    return this.state.game.comparison;
   }
 }

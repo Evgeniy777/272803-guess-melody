@@ -15,7 +15,8 @@ export default class Application {
     const preloadRemove = this.showPreloader();
     this.model = new Model();
 
-    this.model.load()
+    this.model.load(`questions`)
+      .then(() => this.model.loadGameAudios())
       .then(() => this.setup())
       .then(preloadRemove)
       .then(() => this.changeController())
@@ -49,40 +50,26 @@ export default class Application {
     location.hash = ControllerID.GAME;
   }
 
-  showResultsScreen(state) {
-    let result = {
-      controller: ControllerID.RESULT
-    };
-
-    switch (state.result) {
-      case `win`:
-        result.params = {
-          result: state.result,
-          time: state.statistics.time,
-          answers: state.statistics.rightAnswers
-        };
-        break;
-      case `loss`:
-        result.params = {
-          result: state.result
-        };
-    }
-
-    location.hash = Application.serialize(result);
+  showResultsScreen() {
+    location.hash = ControllerID.RESULT;
   }
 
   changeController() {
-    const {controller, params} = Application.deserialize(location.hash);
+    const controller = this.getControllerFromHash(location.hash);
     const Controller = this.router[controller];
 
     if (Controller) {
-      new Controller(this, params).init();
+      new Controller(this).init();
     } else {
       this.showWelcome();
     }
   }
 
-  static serialize(state) {
+  getControllerFromHash(hash) {
+    return hash.substr(1);
+  }
+
+  /* static serialize(state) {
     const paramKeys = Object.keys(state.params);
     return `${state.controller}` + (paramKeys.length ? `?` + paramKeys.map((param) => `${param}=${state.params[param]}`).join(`&`) : ``);
   }
@@ -100,5 +87,5 @@ export default class Application {
     }
 
     return {controller, params};
-  }
+  }*/
 }

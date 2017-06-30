@@ -6,7 +6,7 @@ export default class GameController {
   constructor(application) {
     this.application = application;
     this.model = this.application.model;
-    this.timer = new TimerView(this.application.model.state);
+    this.timer = new TimerView(this.application.model.state.duration);
   }
 
   init() {
@@ -37,12 +37,26 @@ export default class GameController {
   }
 
   checkResult() {
-    if (this.model.state.result) {
-      this.application.showResultsScreen(this.model.state);
-      this.resetTimer();
-    } else {
-      this.getNextQuestion();
-      this.initQuestion();
+    const game = this.model.state.game;
+
+    switch (game.result) {
+      case `win`:
+        const preloadRemove = this.application.showPreloader();
+
+        this.resetTimer();
+        this.model.save(game.statistics)
+          .then(() => this.model.loadStatistics())
+          .then(() => this.model.findComparison())
+          .then(preloadRemove)
+          .then(() => this.application.showResultsScreen(game));
+        break;
+      case `loss`:
+        this.resetTimer();
+        this.application.showResultsScreen(game);
+        break;
+      default:
+        this.getNextQuestion();
+        this.initQuestion();
     }
   }
 
@@ -52,6 +66,7 @@ export default class GameController {
 
   getNextQuestion() {
     const question = this.model.state.questions[this.model.state.questionNumber];
+    
     const map = {
       artist: SingerQuestionView,
       genre: GenreQuestionView
