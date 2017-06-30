@@ -92,26 +92,6 @@ export default class Model extends AbstractModel {
       });
   }
 
-  loadAudio(url) {
-    const getAudio = () => new Promise((resolve, reject) => {
-      const audio = document.createElement(`audio`);
-      audio.src = url;
-
-      audio.onloadeddata = (evt) => resolve(evt.target.response);
-      audio.onerror = () => reject(`Error`);
-    });
-    return getAudio();
-  }
-
-  loadGameAudios() {
-    const urls = [];
-    this.state.questions.forEach((question) => question.src ? urls.push(question.src) : question.answers.forEach((answer) => urls.push(answer.src)));
-
-    return this.loadAudio(urls[0])
-      .then(() => urls.slice(1).forEach((url) => this.loadAudio(url)))
-      .catch(window.console.error);
-  }
-
   resetState() {
     this.state = this.initialState;
     this.load();

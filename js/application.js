@@ -16,11 +16,11 @@ export default class Application {
     this.model = new Model();
 
     this.model.load(`questions`)
-      .then(() => this.model.loadGameAudios())
+      .then(() => this.loadGameAudios())
       .then(() => this.setup())
       .then(preloadRemove)
       .then(() => this.changeController())
-      .catch(window.console.error);
+      .catch((error) => window.console.warn(error));
   }
 
   setup() {
@@ -33,6 +33,26 @@ export default class Application {
     window.addEventListener(`hashchange`, () => {
       this.changeController();
     });
+  }
+
+  loadAudio(url) {
+    const getAudio = () => new Promise((resolve, reject) => {
+      const audio = document.createElement(`audio`);
+      audio.src = url;
+
+      audio.onloadeddata = (evt) => resolve(evt.target.response);
+      audio.onerror = () => reject(`Error`);
+    });
+    return getAudio()
+      .catch((error) => window.console.warn(error));
+  }
+
+  loadGameAudios() {
+    const urls = [];
+    this.model.state.questions.forEach((question) => question.src ? urls.push(question.src) : question.answers.forEach((answer) => urls.push(answer.src)));
+
+    return Promise.all(urls.map((url) => this.loadAudio(url)))
+      .catch((error) => window.console.warn(error));
   }
 
   showPreloader() {
