@@ -13,14 +13,22 @@ export default class GameController {
     this.showTimer();
     this.timer.finishGame = () => this.application.showResultsScreen(this.model.changeState());
     this.timer.changeState = (time) => this.model.changeTime(time);
-    this.getNextQuestion();
     this.initQuestion();
   }
 
   initQuestion() {
+    const question = this.model.state.questions[this.model.state.questionNumber];
+    const map = {
+      artist: SingerQuestionView,
+      genre: GenreQuestionView
+    };
+    this.question = new map[question.type](question);
+
     this.showQuestion();
+    const answerTime = Date.now();
+
     this.question.checkAnswer = (isValidAnswer) => {
-      this.model.changeState(isValidAnswer);
+      this.model.changeState(isValidAnswer, answerTime);
       this.checkResult();
     };
   }
@@ -57,25 +65,11 @@ export default class GameController {
         this.application.showResultsScreen();
         break;
       default:
-        this.getNextQuestion();
         this.initQuestion();
     }
   }
 
   resetTimer() {
     this.timer.stopTimer();
-  }
-
-  getNextQuestion() {
-    const question = this.model.state.questions[this.model.state.questionNumber];
-
-    const map = {
-      artist: SingerQuestionView,
-      genre: GenreQuestionView
-    };
-
-    this.question = new map[question.type](question);
-
-    return this.question;
   }
 }

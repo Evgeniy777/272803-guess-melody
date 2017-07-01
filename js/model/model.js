@@ -13,11 +13,11 @@ const defaultAdapter = new class extends DefaultAdapter {
 }();
 
 class AbstractModel {
-  get getDataUrl() {
+  get urlRead() {
     throw Error(`Abstract method. Define URL for model`);
   }
 
-  get statsUrl() {
+  get urlWright() {
     throw Error(`Abstract method. Define URL for model`);
   }
 
@@ -26,7 +26,7 @@ class AbstractModel {
   }
 
   load() {
-    return fetch(this.getDataUrl)
+    return fetch(this.urlRead)
       .then((resp) => resp.json());
   }
 
@@ -38,15 +38,19 @@ class AbstractModel {
       },
       method: `POST`
     };
-    return fetch(this.statsUrl, settings);
+    return fetch(this.urlWright, settings);
   }
 }
 
 export default class Model extends AbstractModel {
-  get getDataUrl() {
+  get urlRead() {
     return `${API_URL}/questions`;
   }
-  get statsUrl() {
+  get urlWright() {
+    return `${API_URL}/stats/Andrey272803`;
+  }
+
+  get statsUrlRead() {
     return `${API_URL}/stats/Andrey272803`;
   }
 
@@ -56,7 +60,6 @@ export default class Model extends AbstractModel {
       leftMistakes: 3,
       questionNumber: 0,
       questions: null,
-      prevAnswerTime: 0,
       statistics: {
         rightAnswers: 0,
         result: null,
@@ -86,7 +89,7 @@ export default class Model extends AbstractModel {
   }
 
   loadStatistics() {
-    return fetch(this.statsUrl)
+    return fetch(this.statsUrlRead)
       .then((data) => data.json())
       .then((data) => {
         this.state.history = data;
@@ -98,18 +101,17 @@ export default class Model extends AbstractModel {
     return this.load();
   }
 
-  changeState(isValidAnswer) {
+  changeState(isValidAnswer, answerTime) {
     const statistics = this.state.statistics;
     const currentState = Object.assign({}, this.state, {
       leftMistakes: this.state.leftMistakes - (isValidAnswer ? 0 : 1),
       questionNumber: this.state.questionNumber + 1,
-      prevAnswerTime: statistics.time,
       statistics: Object.assign({}, statistics, {
         rightAnswers: statistics.rightAnswers + (isValidAnswer ? 1 : 0)
       })
     });
     if (isValidAnswer) {
-      currentState.statistics.answers = statistics.answers + (currentState.prevAnswerTime - this.state.prevAnswerTime < 10 ? 2 : 1);
+      currentState.statistics.answers = statistics.answers + ((Date.now() - answerTime) / 1000 < 10 ? 2 : 1);
     }
 
     if (currentState.statistics.time === currentState.duration || !currentState.leftMistakes) {

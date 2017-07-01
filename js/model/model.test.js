@@ -5,20 +5,20 @@ describe(`Model#changeState()`, () => {
   it(`next state object is not equal to the initial state object`, () => {
     const model = new Model();
     model.state.questions = [{}, {}, {}, {}, {}];
-    model.changeState(true);
+    model.changeState(true, 0);
     assert.notEqual(model.state, model.initialState);
   });
   describe(`leftMistakes`, () => {
     it(`should always be decremented, if the answer is wrong`, () => {
       const model = new Model();
       model.state.questions = [{}, {}, {}, {}, {}];
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.equal(model.state.leftMistakes, 2);
     });
     it(`should always stay static, if the answer is correct`, () => {
       const model = new Model();
       model.state.questions = [{}, {}, {}, {}, {}];
-      model.changeState(true);
+      model.changeState(true, 0);
       assert.equal(model.state.leftMistakes, 3);
     });
     it(`if becomes 0, the game always finishes`, () => {
@@ -27,7 +27,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 0,
-        prevAnswerTime: 0,
         statistics: {
           time: 0,
           answers: 0,
@@ -36,7 +35,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.notStrictEqual(model.state.statistics.result, null);
     });
   });
@@ -44,10 +43,10 @@ describe(`Model#changeState()`, () => {
     it(`should always be incremented, whether the answer is wrong or correct`, () => {
       const model = new Model();
       model.state.questions = [{}, {}, {}, {}, {}];
-      model.changeState(true);
+      model.changeState(true, 0);
       assert.equal(model.state.questionNumber, 1);
 
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.equal(model.state.questionNumber, 2);
     });
     it(`if becomes equal to data length, the game always finishes`, () => {
@@ -55,7 +54,6 @@ describe(`Model#changeState()`, () => {
       model.state = Object.assign({}, model.initialState, {
         duration: 120,
         leftMistakes: 2,
-        prevAnswerTime: 0,
         questionNumber: 4,
         statistics: {
           time: 0,
@@ -65,7 +63,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.notStrictEqual(model.state.statistics.result, null);
     });
   });
@@ -73,13 +71,13 @@ describe(`Model#changeState()`, () => {
     it(`should always be incremented, if the answer is correct`, () => {
       const model = new Model();
       model.state.questions = [{}, {}, {}, {}, {}];
-      model.changeState(true);
+      model.changeState(true, 0);
       assert.equal(model.state.statistics.rightAnswers, 1);
     });
     it(`should always stay static, if the answer is wrong`, () => {
       const model = new Model();
       model.state.questions = [{}, {}, {}, {}, {}];
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.equal(model.state.statistics.rightAnswers, 0);
     });
   });
@@ -90,7 +88,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 4,
-        prevAnswerTime: 0,
         statistics: {
           time: 0,
           answers: 0,
@@ -99,7 +96,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(true);
+      model.changeState(true, 0);
       assert.equal(model.state.statistics.result, `win`);
     });
     it(`should always be 'loss', if there are no mistakes left`, () => {
@@ -108,7 +105,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 4,
-        prevAnswerTime: 0,
         statistics: {
           time: 0,
           answers: 0,
@@ -117,7 +113,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.equal(model.state.statistics.result, `loss`);
     });
   });
@@ -128,7 +124,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 4,
-        prevAnswerTime: 35,
         statistics: {
           time: 40,
           answers: 2,
@@ -137,7 +132,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(true);
+      model.changeState(true, Date.now() - 5000);
       assert.equal(model.state.statistics.answers, 4);
     });
     it(`should be increased with 1, if time the player answers correctly in more or equal 10`, () => {
@@ -146,7 +141,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 4,
-        prevAnswerTime: 30,
         statistics: {
           time: 40,
           answers: 10,
@@ -155,7 +149,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(true);
+      model.changeState(true, Date.now() - 10000);
       assert.equal(model.state.statistics.answers, 11);
     });
     it(`should not be increased, if the player answer is wrong`, () => {
@@ -164,7 +158,6 @@ describe(`Model#changeState()`, () => {
         duration: 120,
         leftMistakes: 1,
         questionNumber: 4,
-        prevAnswerTime: 30,
         statistics: {
           time: 40,
           answers: 10,
@@ -173,7 +166,7 @@ describe(`Model#changeState()`, () => {
         },
         questions: [{}, {}, {}, {}, {}]
       });
-      model.changeState(false);
+      model.changeState(false, 0);
       assert.equal(model.state.statistics.answers, 10);
     });
   });
