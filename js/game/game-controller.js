@@ -46,7 +46,6 @@ export default class GameController {
         this.resetTimer();
         this.model.save(game.statistics)
           .then(() => this.model.loadStatistics())
-          .then(() => this.model.findComparison())
           .then(preloadRemove)
           .then(() => this.application.showResultsScreen(game));
         break;

@@ -1,3 +1,5 @@
+import {API_URL} from '../constants';
+
 class DefaultAdapter {
   toServer() {
     throw Error(`Abstract method. Define toServer method`);
@@ -11,11 +13,11 @@ const defaultAdapter = new class extends DefaultAdapter {
 }();
 
 class AbstractModel {
-  get urlRead() {
+  get getDataUrl() {
     throw Error(`Abstract method. Define URL for model`);
   }
 
-  get urlWrite() {
+  get statsUrl() {
     throw Error(`Abstract method. Define URL for model`);
   }
 
@@ -24,7 +26,7 @@ class AbstractModel {
   }
 
   load() {
-    return fetch(this.urlRead)
+    return fetch(this.getDataUrl)
       .then((resp) => resp.json());
   }
 
@@ -36,16 +38,16 @@ class AbstractModel {
       },
       method: `POST`
     };
-    return fetch(this.urlWrite, settings);
+    return fetch(this.statsUrl, settings);
   }
 }
 
 export default class Model extends AbstractModel {
-  get urlRead() {
-    return `https://intensive-ecmascript-server-btfgudlkpi.now.sh/guess-melody/questions`;
+  get getDataUrl() {
+    return `${API_URL}/questions`;
   }
-  get urlWrite() {
-    return `https://intensive-ecmascript-server-btfgudlkpi.now.sh/guess-melody/stats/Andrey272803`;
+  get statsUrl() {
+    return `${API_URL}/stats/Andrey272803`;
   }
 
   get initialState() {
@@ -54,6 +56,7 @@ export default class Model extends AbstractModel {
       leftMistakes: 3,
       questionNumber: 0,
       questions: null,
+      questionTime: 0,
       game: {
         rightAnswers: 0,
         result: null,
@@ -85,7 +88,7 @@ export default class Model extends AbstractModel {
   }
 
   loadStatistics() {
-    return fetch(this.urlWrite)
+    return fetch(this.statsUrl)
       .then((data) => data.json())
       .then((data) => {
         this.state.history = data;
@@ -103,13 +106,14 @@ export default class Model extends AbstractModel {
     const currentState = Object.assign({}, this.state, {
       leftMistakes: this.state.leftMistakes - (isValidAnswer ? 0 : 1),
       questionNumber: this.state.questionNumber + 1,
+      questionTime: statistics.time,
       game: Object.assign({}, game, {
-        rightAnswers: game.rightAnswers + (isValidAnswer ? 1 : 0),
-        statistics: Object.assign({}, statistics, {
-          answers: statistics.answers + (isValidAnswer ? 1 : 0)
-        })
+        rightAnswers: game.rightAnswers + (isValidAnswer ? 1 : 0)
       })
     });
+    if (isValidAnswer) {
+      currentState.game.statistics.answers = statistics.answers + (currentState.questionTime - this.state.questionTime < 10 ? 2 : 1);
+    }
 
     if (currentState.game.statistics.time === currentState.duration || !currentState.leftMistakes) {
       currentState.game.result = `loss`;
@@ -132,22 +136,5 @@ export default class Model extends AbstractModel {
     });
 
     return this.state;
-  }
-
-  findComparison() {
-    const statistics = this.state.history.slice();
-    const myStatistics = this.state.game.statistics;
-    const myTime = parseInt(myStatistics.time, 10);
-    const myRightAnswers = parseInt(myStatistics.answers, 10);
-
-    const worseResults = statistics.filter((result) => {
-      const rightAnswers = parseInt(result.answers, 10);
-
-      return rightAnswers === myRightAnswers ? parseInt(result.time, 10) > myTime : rightAnswers < myRightAnswers;
-    });
-
-    this.state.game.comparison = Math.floor(worseResults.length * 100 / statistics.length);
-
-    return this.state.game.comparison;
   }
 }

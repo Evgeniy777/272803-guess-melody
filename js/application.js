@@ -31,19 +31,20 @@ export default class Application {
       [ControllerID.RESULT]: ResultsController
     };
 
-    window.addEventListener(`hashchange`, () => {
-      this.changeController();
-    });
+    window.addEventListener(`hashchange`, () => this.changeController());
   }
 
   loadGameAudios() {
-    const urls = [];
+    let urls = [];
     this.model.state.questions
-      .forEach((question) => question.src ?
-      urls.push(question.src) :
-      question.answers.forEach((answer) => urls.push(answer.src)));
+      .forEach(
+        (question) => question.src ?
+        urls.push(question.src) :
+        question.answers.forEach((answer) => urls.push(answer.src))
+      );
+    urls = urls.filter((url) => url);
 
-    return Promise.all(urls.filter((url) => !!url).map((url) => loadAudio(url)));
+    return Promise.all(urls.map((url) => loadAudio(url)));
   }
 
   showPreloader() {
@@ -79,24 +80,4 @@ export default class Application {
   getControllerFromHash(hash) {
     return hash.substr(1);
   }
-
-  /* static serialize(state) {
-    const paramKeys = Object.keys(state.params);
-    return `${state.controller}` + (paramKeys.length ? `?` + paramKeys.map((param) => `${param}=${state.params[param]}`).join(`&`) : ``);
-  }
-
-  static deserialize(hash) {
-    const [controller, queryString] = hash.substr(1).split(`?`);
-    const params = {};
-
-    if (queryString) {
-      queryString.split(`&`).forEach((param) => {
-        const [key, value] = param.split(`=`);
-
-        params[key] = value;
-      });
-    }
-
-    return {controller, params};
-  }*/
 }
