@@ -37,21 +37,24 @@ export default class GameController {
   }
 
   checkResult() {
-    const game = this.model.state.game;
+    const statistics = this.model.state.statistics;
 
-    switch (game.result) {
+    switch (statistics.result) {
       case `win`:
         const preloadRemove = this.application.showPreloader();
 
         this.resetTimer();
-        this.model.save(game.statistics)
+        this.model.save({
+          time: statistics.time,
+          answers: statistics.answers
+        })
           .then(() => this.model.loadStatistics())
           .then(preloadRemove)
-          .then(() => this.application.showResultsScreen(game));
+          .then(() => this.application.showResultsScreen());
         break;
       case `loss`:
         this.resetTimer();
-        this.application.showResultsScreen(game);
+        this.application.showResultsScreen();
         break;
       default:
         this.getNextQuestion();

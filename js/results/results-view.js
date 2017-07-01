@@ -11,7 +11,7 @@ export default class ResultsView extends AbstractView {
     const resultContent = {
       win: {
         title: `Вы настоящий меломан!`,
-        stat: `За&nbsp;${this.stats.statistics.time}&nbsp;секунд<br>вы&nbsp;отгадали ${this.stats.rightAnswers}&nbsp;мелодии`,
+        stat: `За&nbsp;${this.stats.time}&nbsp;секунд<br>вы&nbsp;отгадали ${this.stats.rightAnswers}&nbsp;мелодии`,
         comparison: `<span class="main-comparison">Это&nbsp;лучше чем у&nbsp;${this.stats.comparison}%&nbsp;игроков</span>`
       },
       loss: {

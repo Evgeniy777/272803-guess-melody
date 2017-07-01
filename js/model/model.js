@@ -56,14 +56,12 @@ export default class Model extends AbstractModel {
       leftMistakes: 3,
       questionNumber: 0,
       questions: null,
-      questionTime: 0,
-      game: {
+      prevAnswerTime: 0,
+      statistics: {
         rightAnswers: 0,
         result: null,
-        statistics: {
-          time: 0,
-          answers: 0
-        }
+        time: 0,
+        answers: 0
       },
       history: null
     };
@@ -97,28 +95,27 @@ export default class Model extends AbstractModel {
 
   resetState() {
     this.state = this.initialState;
-    this.load();
+    return this.load();
   }
 
   changeState(isValidAnswer) {
-    const game = this.state.game;
-    const statistics = game.statistics;
+    const statistics = this.state.statistics;
     const currentState = Object.assign({}, this.state, {
       leftMistakes: this.state.leftMistakes - (isValidAnswer ? 0 : 1),
       questionNumber: this.state.questionNumber + 1,
-      questionTime: statistics.time,
-      game: Object.assign({}, game, {
-        rightAnswers: game.rightAnswers + (isValidAnswer ? 1 : 0)
+      prevAnswerTime: statistics.time,
+      statistics: Object.assign({}, statistics, {
+        rightAnswers: statistics.rightAnswers + (isValidAnswer ? 1 : 0)
       })
     });
     if (isValidAnswer) {
-      currentState.game.statistics.answers = statistics.answers + (currentState.questionTime - this.state.questionTime < 10 ? 2 : 1);
+      currentState.statistics.answers = statistics.answers + (currentState.prevAnswerTime - this.state.prevAnswerTime < 10 ? 2 : 1);
     }
 
-    if (currentState.game.statistics.time === currentState.duration || !currentState.leftMistakes) {
-      currentState.game.result = `loss`;
+    if (currentState.statistics.time === currentState.duration || !currentState.leftMistakes) {
+      currentState.statistics.result = `loss`;
     } else if (currentState.questionNumber === currentState.questions.length) {
-      currentState.game.result = `win`;
+      currentState.statistics.result = `win`;
     }
 
     this.state = currentState;
@@ -129,10 +126,8 @@ export default class Model extends AbstractModel {
   changeTime(time) {
     const gameTime = this.state.duration - time;
 
-    this.state.game = Object.assign({}, this.state.game, {
-      statistics: Object.assign({}, this.state.game.statistics, {
-        time: gameTime
-      })
+    this.state.statistics = Object.assign({}, this.state.statistics, {
+      time: gameTime
     });
 
     return this.state;
